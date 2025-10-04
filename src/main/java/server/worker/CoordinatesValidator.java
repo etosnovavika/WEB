@@ -29,11 +29,29 @@ public final class CoordinatesValidator extends Worker<ValidateCoordinatesReques
     public ValidateCoordinatesRequest encode(Properties params) throws ValidationException {
         // --- режим установки диапазона ---
         if (params.containsKey("xMin") && params.containsKey("xMax") && params.containsKey("r")) {
-            double xMin = Double.parseDouble(params.getProperty("xMin").trim());
-            double xMax = Double.parseDouble(params.getProperty("xMax").trim());
-            double r = Double.parseDouble(params.getProperty("r").trim());
+            String sxMin = params.getProperty("xMin", "").trim();
+            String sxMax = params.getProperty("xMax", "").trim();
+            String sr = params.getProperty("r", "").trim();
+
+            double xMin;
+            double xMax;
+            double r;
+            try {
+                xMin = Double.parseDouble(sxMin);
+                xMax = Double.parseDouble(sxMax);
+                r = Double.parseDouble(sr);
+            } catch (NumberFormatException e) {
+                throw new ValidationException("Range parameters must be valid numbers.");
+            }
+
+            if (!Double.isFinite(xMin) || !Double.isFinite(xMax) || !Double.isFinite(r)) {
+                throw new ValidationException("Range parameters must be finite numbers.");
+            }
 
             if (xMin >= xMax) throw new ValidationException("xMin must be less than xMax.");
+            if (r <= 0) throw new ValidationException("R must be greater than 0.");
+
+
 
             RANGE_X_MIN = xMin;
             RANGE_X_MAX = xMax;
