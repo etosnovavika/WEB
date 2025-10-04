@@ -1,0 +1,210 @@
+body {
+    font-family: 'sans-serif', monospace ;
+    margin: 0;
+    padding: 0;
+    background-color: ivory;
+    color: dimgray;
+    font-size: 18px;
+    transform: perspective(800px) scale(1.05);
+    transform-origin: center;
+}
+.container {
+    width: 50%;
+    margin: auto;
+    background-color: peachpuff;
+    border-radius: 20px;
+    overflow: hidden;
+    padding: 10px;
+}
+header {
+    text-align: left;
+    font-size: 22px;
+    color: dimgrey;
+    border-bottom: 2px solid ;
+}
+.graph {
+    width: 400px;
+    height: auto;
+    border: 1px solid azure;
+}
+form {
+    background-color: gray;
+    padding: 15px;
+}
+.canvasPlaceholder {
+    background-color: peru;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+}
+.inputPlaceholder {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    /*justify-content: center;*/
+    background: ivory;
+    padding: 10px;
+    margin-bottom: 26px;
+}
+
+.inputPlaceholder label {
+    margin-right: 10px;
+    color: dimgrey;
+    font-size: 18px;
+}
+
+.fieldName {
+    color: dimgrey;
+    font-size: 23px !important;
+}
+.slider {
+    -webkit-appearance: none; /* Disable default appearance */
+    width: 100%;
+    height: 3px;
+    border-radius: 5px;
+    outline: none;
+    background: honeydew;
+    margin: 5px 5px 5px 0;
+}
+
+/* ------------- Radio group Customization ------------- */
+.radio-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 items per row */
+    gap: 10px; /* Space between buttons */
+}
+
+.radio-group label {
+    text-align: center;
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: dimgray;
+    cursor: pointer;
+    color: antiquewhite;
+    border: 2px solid azure;
+    transition: background-color 0.1s, color 0.3s, border 0.45s;
+}
+
+.radio-group input[type="radio"] {
+    display: none;
+}
+
+.radio-group input[type="radio"]:checked + label {
+    background-color: azure;
+    color: rosybrown;
+    border: 2px solid dimgray;
+}
+.radio-group label:hover {
+    background-color: dimgray;
+    color: azure;
+}
+
+.radio-group input[type="radio"]:checked + label:hover {
+    background-color: azure;
+    color: dimgray;
+}
+.controlPlaceholder {
+    width: 100%;
+    padding: 6px;
+    font-size: 18px;
+    background-color: azure;
+    color:dimgray;
+    border: none;
+    outline: none;
+    text-align: left;
+}
+
+/* ------------- Button Customization ------------- */
+
+.button-group .r-button {
+    background-color: dimgray;
+    border: none;
+    padding: 6px;
+    /*margin: 5px;*/
+    cursor: pointer;
+    color: azure;
+    font-size: 18px;
+}
+
+.button-group .r-button.selected {
+    background-color: azure;
+    color: dimgray;
+}.slider::-webkit-slider-thumb {
+     -webkit-appearance: none;
+     appearance: none;
+     width: 10px;
+     border-radius: 50%;
+     background: dimgray;
+     cursor: pointer;
+     box-shadow: 0 0 2px rgba(0, 0, 0, 0.7);
+ }
+
+.slider::-moz-range-thumb {
+    width: 10px;
+    height: 20px;
+    border-radius: 0;
+    background: dimgray;
+    cursor: pointer;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.7);
+}
+
+/* ------------- Slider Labels Styling ------------- */
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: azure;
+    margin-top: 5px;
+}
+
+.slider-labels span {
+    width: 20px;
+    text-align: center;
+}
+label {
+    color: azure;
+}
+
+label span {
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+label span.select {
+    color: lavenderblush;
+    background-color: dimgray;
+    font-size: 18px;
+    padding: 5px;
+}
+.btn-submit {
+    background-color: peachpuff;
+    color: dimgray;
+    padding: 10px 20px;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    width: 100%;
+    /*border-radius: 10px;*/
+}
+
+.btn-submit:hover {
+    background-color: rosybrown;
+    color: azure;
+}
+
+.btn-submit:active {
+    box-shadow: 0 0 5px azure inset;
+    transform: scale(0.95);
+}
+ul, ol {
+    list-style-type: none;
+}
+a {
+    color: rosybrown;
+    text-decoration: none;
+}
+
+a:hover {
+    color: dimgrey;
+    background-color: azure;
+}

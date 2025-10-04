@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <style>
+        @font-face {
+            font-family: sans-serif;
+            src: url("font/sans-serif.otf") format('opentype');
+        }
+        /*body {*/
+        /*    cursor: url('font/fnv.cur'), auto;*/
+        /*}*/
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEB Lab1</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/normalise.css">
+</head>
+<body>
+<div class="container">
+    <!--  HEADER  -->
+    <header>
+        <div class="credentials">
+
+            <ul>
+                <li>Веб-программирование 1 <a href="variant.html">Вариант 467464</a></li>
+                <li>Выполнила Симдякина Виктория Вадимовна</li>
+            </ul>
+        </div>
+    </header>
+    <main>
+        <div class="canvasPlaceholder">
+            <canvas id="graph" width="500" height="500" class="graph"></canvas>
+        </div>
+        <div class="inputPlaceholder">
+
+            <form id="rangeForm" autocomplete="off">
+                <div>
+
+                    <label for="xMin" class="fieldName">X min:</label>
+                    <input type="number" id="xMin" name="xMin" required step="0.5">
+                </div>
+                <div>
+                    <label for="xMax" class="fieldName">X max:</label>
+                    <input type="number" id="xMax" name="xMax" required step="0.5">
+                </div>
+                <div>
+                    <label for="rRange" class="fieldName">R:</label>
+                    <input type="number" id="rRange" name="rRange" required step="0.5" min="1" max="5">
+                </div>
+                <button type="submit"><strong>Проверить диапазон</strong></button>
+                <div class="inputPlaceholder">
+                    <label for="x" class="fieldName">X</label>
+                    <input type="text" id="x" name="x" value="0" min="-100" max="100"
+                           placeholder="&#8722;3 &le; y &le; 3"
+                           step="0.5" required>
+                </div>
+                <div class="inputPlaceholder">
+                    <label for="y" class="fieldName">Y:</label>
+                    <input type="text" id="y" name="y" value="0" min="-3" max="3"
+                           placeholder="&#8722;3 &le; y &le; 3"
+                           step="0.001" required>
+                </div>
+                <div class="inputPlaceholder">
+                    <label for="r" class="fieldName">R</label>
+                    <input type="text" id="r" name="r" value="0"
+                           placeholder="&#8722;3 &le; y &le; 3"
+                           step="1" required>
+
+                </div>
+
+<!--                <div class="inputPlaceholder">-->
+<!--                    <label for="r" class="fieldName" >R:</label>-->
+<!--                    <div id="r" class="button-group controlPlaceholder">-->
+<!--                        <button type="button" class="r-button" value="1">1</button>-->
+<!--                        <button type="button" class="r-button" value="1.5">1.5</button>-->
+<!--                        <button type="button" class="r-button" value="2">2</button>-->
+<!--                        <button type="button" class="r-button" value="2.5">2.5</button>-->
+<!--                        <button type="button" class="r-button" value="3">3</button>-->
+<!--                    </div>-->
+<!--                </div>-->
+                <button id="submit" type="submit" class="btn-submit"><strong>Отправить</strong></button>
+            </form>
+        </div>
+<!--        <div class="inputPlaceholder">-->
+<!--            <form id="form" autocomplete="off">-->
+<!--                &lt;!&ndash; X &ndash;&gt;-->
+<!--                <div class="inputPlaceholder">-->
+<!--                    <label>X:</label>-->
+<!--                    <div class="radio-group">-->
+<!--                        <input type="radio" name="x" id="x-5" value="-5">-->
+<!--                        <label for="x-5">-5</label>-->
+<!--                        <input type="radio" name="x" id="x-4" value="-4" checked>-->
+<!--                        <label for="x-4">-4</label>-->
+<!--                        <input type="radio" name="x" id="x-3" value="-3">-->
+<!--                        <label for="x-3">-3</label>-->
+<!--                        <input type="radio" name="x" id="x-2" value="-2">-->
+<!--                        <label for="x-2">-2</label>-->
+<!--                        <input type="radio" name="x" id="x-1" value="-1">-->
+<!--                        <label for="x-1">-1</label>-->
+<!--                        <input type="radio" name="x" id="x0" value="0">-->
+<!--                        <label for="x0">0</label>-->
+<!--                        <input type="radio" name="x" id="x1" value="1">-->
+<!--                        <label for="x1">1</label>-->
+<!--                        <input type="radio" name="x" id="x2" value="2">-->
+<!--                        <label for="x2">2</label>-->
+<!--                        <input type="radio" name="x" id="x3" value="3">-->
+<!--                        <label for="x3">3</label>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="inputPlaceholder">-->
+<!--                    <label for="y" class="fieldName">Y:</label>-->
+<!--                    <input type="text" id="y" name="y" value="0" min="-3" max="3"-->
+<!--                           placeholder="&#8722;3 &le; y &le; 3"-->
+<!--                           step="0.001" required>-->
+<!--                </div>-->
+
+<!--                <div class="inputPlaceholder">-->
+<!--                    <label for="r" class="fieldName" >R:</label>-->
+<!--                    <div id="r" class="button-group controlPlaceholder">-->
+<!--                        <button type="button" class="r-button" value="1">1</button>-->
+<!--                        <button type="button" class="r-button" value="1.5">1.5</button>-->
+<!--                        <button type="button" class="r-button" value="2">2</button>-->
+<!--                        <button type="button" class="r-button" value="2.5">2.5</button>-->
+<!--                        <button type="button" class="r-button" value="3">3</button>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <button id="submit" type="submit" class="btn-submit"><strong>Отправить</strong></button>-->
+<!--            </form>-->
+<!--        </div>-->
+    </main>
+    <div id="results">
+        <h2>Результаты</h2>
+        <table id="results-table" border="1">
+            <thead>
+            <tr>
+                <th>X</th>
+                <th>Y</th>
+                <th>R</th>
+                <th>Результат</th>
+                <th>Время</th>
+                <th>Время выполнения</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- сюда будут добавляться новые строки -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="js/lib/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="js/plot.js"></script>
+    <script type="text/javascript" src="js/update.js"></script>
+    <script type="text/javascript" src="js/fetch.js"></script>
+</div>
+</body>
+</html>
