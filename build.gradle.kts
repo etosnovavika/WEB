@@ -17,6 +17,7 @@ repositories {
 
 dependencies {
     implementation(files("lib/fastcgi-lib.jar"))
+    implementation ("org.json:json:20240303")
 }
 
 application {
@@ -37,5 +38,5 @@ tasks.named<Jar>("jar") {
     exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    archiveFileName.set("WEB1_2.jar")
+    archiveFileName.set("WEB1_2_2.jar")
 }

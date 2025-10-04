@@ -28,6 +28,10 @@ public abstract class Worker<RQ, RS> implements Runnable, FcgiConverter<RQ, RS> 
      * @throws IOException If an I/O error occurs.
      */
     private void loop() throws IOException {
+        if (com.fastcgi.FCGIInterface.request == null) {
+            System.err.println("FCGI request is null — skipping iteration");
+            return;
+        }
         // читаем параметры один раз
         final Properties params = Util.readRequestParams();
         final boolean wantJson = "json".equalsIgnoreCase(params.getProperty("format", ""));
@@ -50,7 +54,7 @@ public abstract class Worker<RQ, RS> implements Runnable, FcgiConverter<RQ, RS> 
             } else {
                 // старый HTML-путь
                 final String decoded = decode(response);
-                writeCgiResponse(200, "OK", "application/json; charset=UTF-8", decoded);
+                writeCgiResponse(200, "OK", "text/html; charset=UTF-8", decoded);
             }
         } catch (ValidationException ve) {
             // в серверный лог

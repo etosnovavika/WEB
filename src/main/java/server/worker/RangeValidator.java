@@ -10,18 +10,22 @@ public final class RangeValidator extends Worker<ValidateRangeRequest, ValidateR
 
     @Override
     protected ValidateRangeResponse process(ValidateRangeRequest request) {
-        return new ValidateRangeResponse(request.xMin(), request.xMax(), request.r());
+        return new ValidateRangeResponse(
+                request.xMin(),
+                request.xMax(),
+                request.r(),
+                "Диапазон успешно установлен"
+        );
     }
 
     @Override
     public ValidateRangeRequest encode(Properties params) throws ValidationException {
-        String sxMin = params.getProperty("xMin", "").trim();
-        String sxMax = params.getProperty("xMax", "").trim();
-        String sr = params.getProperty("r", "").trim();
+        String sxMin = params.getProperty("xMin");
+        String sxMax = params.getProperty("xMax");
+        String sr = params.getProperty("r");
 
-        if (sxMin.isEmpty() || sxMax.isEmpty() || sr.isEmpty()) {
-            throw new ValidationException("Missing parameters: xMin, xMax and r are required.");
-        }
+        if (sxMin == null || sxMax == null || sr == null)
+            throw new ValidationException("Missing parameters: xMin, xMax, and r are required.");
 
         double xMin, xMax, r;
         try {
@@ -29,27 +33,31 @@ public final class RangeValidator extends Worker<ValidateRangeRequest, ValidateR
             xMax = Double.parseDouble(sxMax);
             r = Double.parseDouble(sr);
         } catch (NumberFormatException e) {
-            throw new ValidationException("Parameters must be numbers.");
+            throw new ValidationException("Invalid number format.");
         }
-
-        if (xMin >= xMax) throw new ValidationException("xMin must be < xMax.");
-        if (r <= 0) throw new ValidationException("R must be > 0.");
 
         return new ValidateRangeRequest(xMin, xMax, r);
     }
 
+
     @Override
     public String decode(ValidateRangeResponse response) {
         return String.format(
-                "{\"xMin\":%s,\"xMax\":%s,\"r\":%s,\"message\":\"Диапазон успешно установлен\"}",
+                "{\"xMin\":%s,\"xMax\":%s,\"r\":%s,\"message\":\"%s\"}",
                 Util.formatTruncate(response.xMin(), 3),
                 Util.formatTruncate(response.xMax(), 3),
-                Util.formatTruncate(response.r(), 3)
+                Util.formatTruncate(response.r(), 3),
+                Util.escapeJson(response.message())
         );
     }
 
     @Override
     public void validate(ValidateRangeRequest request) throws ValidationException {
-        // Дополнительная проверка если нужно
+        if (request.xMin() >= request.xMax()) {
+            throw new ValidationException("xMin must be < xMax.");
+        }
+        if (request.r() <= 0) {
+            throw new ValidationException("R must be > 0.");
+        }
     }
 }

@@ -610,33 +610,21 @@ $(function() {
     // Инициализируем при загрузке
     initialize();
     async function sendRange(xMin, xMax, r) {
-        try {
-            const params = new URLSearchParams();
-            params.append("xMin", xMin);
-            params.append("xMax", xMax);
-            params.append("r", r);
+        const response = await fetch("/fcgi-bin/WEB1_2_2.jar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ xMin, xMax, r })
+        });
 
-            const response = await fetch("/fcgi-bin/WEB1_2_2.jar", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: params.toString()
-            });
+        const data = await response.json();
 
-            const data = await response.json();
-            if (response.ok) {
-                console.log("Диапазон обновлён:", data);
-                alert("Диапазон X обновлён, R установлен: " + r);
-            } else {
-                console.error("Ошибка:", data.error);
-                alert("Ошибка: " + data.error);
-            }
-        } catch (err) {
-            console.error("Сеть/сервер не отвечает:", err);
-            alert("Сервер недоступен");
+        if (data.error) {
+            alert("Ошибка: " + data.error);
+        } else {
+            alert(`Диапазон установлен: X ∈ [${data.xMin}, ${data.xMax}], R = ${data.r}`);
         }
     }
+
 
     $('#rangeForm').on('submit', function(e) {
         e.preventDefault();
