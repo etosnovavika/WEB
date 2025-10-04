@@ -20,6 +20,15 @@ public final class RangeValidator extends Worker<ValidateRangeRequest, ValidateR
 
     @Override
     public ValidateRangeRequest encode(Properties params) throws ValidationException {
+        String method = params.getProperty("_method", "").toUpperCase();
+        if (!"POST".equals(method)) {
+            throw new ValidationException("Range endpoint accepts only POST requests.");
+        }
+
+        String contentType = params.getProperty("_contentType", "").toLowerCase();
+        if (!contentType.contains("application/json")) {
+            throw new ValidationException("Content-Type must be application/json for range updates.");
+        }
         String sxMin = params.getProperty("xMin");
         String sxMax = params.getProperty("xMax");
         String sr = params.getProperty("r");
@@ -50,7 +59,10 @@ public final class RangeValidator extends Worker<ValidateRangeRequest, ValidateR
                 Util.escapeJson(response.message())
         );
     }
-
+    @Override
+    protected String toJson(ValidateRangeResponse response) {
+        return decode(response);
+    }
     @Override
     public void validate(ValidateRangeRequest request) throws ValidationException {
         if (request.xMin() >= request.xMax()) {

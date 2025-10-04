@@ -27,43 +27,14 @@ public final class CoordinatesValidator extends Worker<ValidateCoordinatesReques
 
     @Override
     public ValidateCoordinatesRequest encode(Properties params) throws ValidationException {
-        // --- режим установки диапазона ---
-        if (params.containsKey("xMin") && params.containsKey("xMax") && params.containsKey("r")) {
-            String sxMin = params.getProperty("xMin", "").trim();
-            String sxMax = params.getProperty("xMax", "").trim();
-            String sr = params.getProperty("r", "").trim();
-
-            double xMin;
-            double xMax;
-            double r;
-            try {
-                xMin = Double.parseDouble(sxMin);
-                xMax = Double.parseDouble(sxMax);
-                r = Double.parseDouble(sr);
-            } catch (NumberFormatException e) {
-                throw new ValidationException("Range parameters must be valid numbers.");
-            }
-
-            if (!Double.isFinite(xMin) || !Double.isFinite(xMax) || !Double.isFinite(r)) {
-                throw new ValidationException("Range parameters must be finite numbers.");
-            }
-
-            if (xMin >= xMax) throw new ValidationException("xMin must be less than xMax.");
-            if (r <= 0) throw new ValidationException("R must be greater than 0.");
-
-
-
-            RANGE_X_MIN = xMin;
-            RANGE_X_MAX = xMax;
-            RANGE_R = r;
-
-            System.out.printf("Updated ranges: X=[%.2f, %.2f], R=%.2f%n", RANGE_X_MIN, RANGE_X_MAX, RANGE_R);
-
-            // возвращаем "пустой" запрос
-            return new ValidateCoordinatesRequest(0.0, 0.0, 0.0);
+        final String method = params.getProperty("_method", "GET").toUpperCase();
+        if ("POST".equals(method)) {
+            return handleRangeUpdate(params);
         }
-
-        // --- обычная точка ---
+        if (!"GET".equals(method)) {
+            throw new ValidationException("Unsupported HTTP method: " + method);
+        }
+// --- обычная точка ---
         String sx = params.getProperty("x", "").trim();
         String syRaw = params.getProperty("y", "").trim();
         String sr = params.getProperty("r", "").trim();
@@ -99,6 +70,46 @@ public final class CoordinatesValidator extends Worker<ValidateCoordinatesReques
 
         return new ValidateCoordinatesRequest(x, y, r);
     }
+    private ValidateCoordinatesRequest handleRangeUpdate(Properties params) throws ValidationException {
+        String contentType = params.getProperty("_contentType", "");
+        if (!contentType.toLowerCase().contains("application/json")) {
+            throw new ValidationException("Range updates must be sent as application/json");
+        }
+
+        if (!params.containsKey("xMin") || !params.containsKey("xMax") || !params.containsKey("r")) {
+            throw new ValidationException("Range update payload must contain xMin, xMax and r");
+        }
+
+        String sxMin = params.getProperty("xMin", "").trim();
+        String sxMax = params.getProperty("xMax", "").trim();
+        String sr = params.getProperty("r", "").trim();
+
+        double xMin;
+        double xMax;
+        double r;
+        try {
+            xMin = Double.parseDouble(sxMin);
+            xMax = Double.parseDouble(sxMax);
+            r = Double.parseDouble(sr);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Range parameters must be valid numbers.");
+        }
+
+        if (!Double.isFinite(xMin) || !Double.isFinite(xMax) || !Double.isFinite(r)) {
+            throw new ValidationException("Range parameters must be finite numbers.");
+        }
+
+        if (xMin >= xMax) throw new ValidationException("xMin must be less than xMax.");
+        if (r <= 0) throw new ValidationException("R must be greater than 0.");
+
+        RANGE_X_MIN = xMin;
+        RANGE_X_MAX = xMax;
+        RANGE_R = r;
+
+        System.out.printf("Updated ranges: X=[%.2f, %.2f], R=%.2f%n", RANGE_X_MIN, RANGE_X_MAX, RANGE_R);
+
+        return new ValidateCoordinatesRequest(0.0, 0.0, 0.0);
+    }
 
     @Override
     public String decode(ValidateCoordinatesResponse response) {
@@ -121,8 +132,15 @@ public final class CoordinatesValidator extends Worker<ValidateCoordinatesReques
 
         return String.format(
                 "{\"x\":%s,\"y\":%s,\"r\":%s,\"result\":%s,\"time\":\"%s\",\"bench\":%d}",
-                xStr, yStr, rStr, hit ? "true" : "false", Util.escapeHtml(timeStr), bench
+                xStr, yStr, rStr, hit ? "true" : "false", Util.escapeJson(timeStr), bench
         );
+    }
+    @Override
+    protected String toJson(ValidateCoordinatesResponse response) {
+        if (response.x() == 0 && response.y() == 0 && response.r() == 0) {
+            return decode(response);
+        }
+        return Util.responseToJson(response);
     }
 
     @Override

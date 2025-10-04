@@ -193,20 +193,18 @@ public abstract class Worker<RQ, RS> implements Runnable, FcgiConverter<RQ, RS> 
             validate(request); // отдельная валидация
             final RS response = process(request);
 
-            if (wantJson) {
-                // пытаемся сериализовать ответ в JSON
-                String json = toJson(response);
-                if (json == null) {
-                    // если не получилось, возвращаем ошибку сервера
-                    String body = "{\"error\":\"server cannot produce json for this response\"}";
-                    writeCgiResponse(ctx, 500, "Internal Server Error", "application/json; charset=UTF-8", body);
-                } else {
-                    writeCgiResponse(ctx, 200, "OK", "application/json; charset=UTF-8", json);
-                }
+            String json = toJson(response);
+            if (json == null) {
+                json = decode(response);
+            }
+
+            if (json == null || json.isBlank()) {
+                String body = "{\"error\":\"server cannot produce json for this response\"}";
+                writeCgiResponse(ctx, 500, "Internal Server Error", "application/json; charset=UTF-8", body);
             } else {
                 // старый HTML-путь
                 final String decoded = decode(response);
-                writeCgiResponse(ctx, 200, "OK", "text/html; charset=UTF-8", decoded);
+                writeCgiResponse(ctx, 200, "OK", "application/json; charset=UTF-8", json);
             }
         } catch (ValidationException ve) {
             // в серверный лог
@@ -231,15 +229,17 @@ public abstract class Worker<RQ, RS> implements Runnable, FcgiConverter<RQ, RS> 
                 System.err.println("Internal error: " + e);
                 e.printStackTrace();
             }
-            if (wantJson) {
-                String body = "{\"error\":\"internal server error\"}";
-                writeCgiResponse(ctx, 500, "Internal Server Error", "application/json; charset=UTF-8", body);
+            if (err != null) {
+                err.println("Internal error: " + e);
+                e.printStackTrace(err);
             } else {
-                String body = "Internal Server Error";
-                writeCgiResponse(ctx, 500, "Internal Server Error", "text/plain; charset=UTF-8", body);
+                System.err.println("Internal error: " + e);
+                e.printStackTrace();
             }
+                String body = "{\"error\":\"internal server error\"}";
+                writeCgiResponse(ctx, 500, "Internal Server Error", "application/json; charset=UTF-8", body);}
         }
-    }
+
 
     /**
      * Метод сериализации ответа в JSON.

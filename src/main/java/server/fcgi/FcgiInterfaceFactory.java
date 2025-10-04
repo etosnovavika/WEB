@@ -43,28 +43,28 @@ public final class FcgiInterfaceFactory {
 
 
     public static FCGIInterface getInstance() {
-            return fcgiInterface == null ? fcgiInterface = new FCGIInterface() : fcgiInterface;
-        }
+        return fcgiInterface == null ? fcgiInterface = new FCGIInterface() : fcgiInterface;
+    }
 
-            static Object acceptLock() {
-            return ACCEPT_LOCK;
-        }
+    static Object acceptLock() {
+        return ACCEPT_LOCK;
+    }
 
-            static void restoreSystemStreams() {
-            System.setIn(ORIGINAL_IN);
-            System.setOut(ORIGINAL_OUT_WRAPPER);
-            System.setErr(ORIGINAL_ERR_WRAPPER);
-            System.setProperties(ORIGINAL_PROPERTIES);
-        }
+    static void restoreSystemStreams() {
+        System.setIn(ORIGINAL_IN);
+        System.setOut(ORIGINAL_OUT_WRAPPER);
+        System.setErr(ORIGINAL_ERR_WRAPPER);
+        System.setProperties(ORIGINAL_PROPERTIES);
+    }
 
-            private static final class UncloseablePrintStream extends PrintStream {
+    private static final class UncloseablePrintStream extends PrintStream {
         private UncloseablePrintStream(PrintStream delegate) {
-                    super(delegate, true);
-                }
+            super(delegate, true);
+        }
 
-                @Override
+        @Override
         public void close() {
-                    flush();
-                }
+            flush();
+        }
     }
 }
