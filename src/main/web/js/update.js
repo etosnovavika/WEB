@@ -1,50 +1,4 @@
-// $(document).ready(function() {
-//     let rValue = 1;
-//
-//     const rButton = $(".r-button");
-//     const yInput = $("#y");
-//
-//     setDefaults();
-//
-//     function setDefaults() {
-//         $('input[name="x"][value="0"]').prop('checked', true);
-//         $('#y').val(0);
-//         setR(1);
-//     }
-//
-//     function setR(r) {
-//         rValue = r;
-//         refresh(rValue);
-//
-//         rButton.removeClass("selected");
-//         $('.r-button[value="' + r + '"]').addClass("selected");
-//     }
-//
-//     rButton.on("click", function () {
-//         setR($(this).val());
-//     });
-//
-//     yInput.on('input', function() {
-//         yInput.val(yInput.val().replace(/[^0-9.,-]/g, ''));
-//         yInput.val(yInput.val().replace(/,/g, '.'));
-//
-//         if (yInput.val() && (parseFloat(yInput.val()) < -3 || parseFloat(yInput.val()) > 3)) {
-//             yInput.val(parseFloat(yInput.val()) > 3 ? 3 : -3);
-//         }
-//
-//         if (yInput.val().indexOf('.') !== -1 && yInput.val().split('.')[1].length > 3) {
-//             yInput.val(yInput.val().substring(0, yInput.val().indexOf('.') + 4));
-//         }
-//
-//         if ((yInput.val().match(/\./g) || []).length > 1) {
-//             yInput.val(yInput.val().substring(0, yInput.val().lastIndexOf('.')));
-//         }
-//
-//         if ((yInput.val().match(/\./g) || []).length === 1 && yInput.val().indexOf('.') === 0) {
-//             yInput.val('0' + yInput.val());
-//         }
-//     });
-// });
+
 $(document).ready(function() {
     const config = {
         defaultX: 0,
@@ -58,7 +12,7 @@ $(document).ready(function() {
     let rValue = config.defaultR;
     const rButton = $(".r-button");
     const yInput = $("#y");
-    const xInputs = $('input[name="x"]');
+    const xInput = $("#x");
 
     initializeForm();
 
@@ -66,6 +20,36 @@ $(document).ready(function() {
         setDefaults();
         setupEventListeners();
         loadFromHistory();
+        const savedRange = localStorage.getItem('lastRange');
+        if (savedRange) {
+            try {
+                const { xMin, xMax, r } = JSON.parse(savedRange);
+                console.log('Восстановлен диапазон из localStorage:', xMin, xMax, r);
+
+                // Подставляем R в форму
+                const rInput = document.getElementById('r');
+                if (rInput) {
+                    rInput.value = r;
+                    rInput.readOnly = true;
+                }
+
+                // Обновляем глобальные переменные
+                window.currentR = r;
+
+                // Визуально показываем
+                const rHint = document.getElementById('rHint');
+                if (rHint) {
+                    rHint.textContent = `Восстановлен диапазон: X=[${xMin}, ${xMax}], R=${r}`;
+                    rHint.style.display = 'inline';
+                }
+
+                // Если хочешь, можно сразу обновить график:
+                if (typeof refresh === 'function') refresh(r);
+            } catch (e) {
+                console.error('Ошибка восстановления диапазона из localStorage:', e);
+            }
+        }
+
     }
 
     function setDefaults() {
@@ -86,7 +70,7 @@ $(document).ready(function() {
         rButton.removeClass("selected");
         $(`.r-button[value="${rValue}"]`).addClass("selected");
 
-        console.log('R установлен:', rValue);
+        // console.log('R установлен:', rValue);
     }
 
     function validateYInput() {
@@ -126,33 +110,55 @@ $(document).ready(function() {
 
     function getFormData() {
         try {
-            // Проверка X
-            const selectedX = $('input[name="x"]:checked');
-            if (selectedX.length === 0) {
-                throw new Error('Выберите значение X');
+            // --- X ---
+            const xRaw = xInput.val().trim();
+            if (xRaw === '') {
+                throw new Error('Введите значение X');
             }
-            const x = parseFloat(selectedX.val());
+            const x = parseFloat(xRaw);
+            if (isNaN(x)) {
+                throw new Error('X должно быть числом');
+            }
 
-            // Проверка Y
-            const y = parseFloat(yInput.val());
+            // --- Y ---
+            const yRaw = yInput.val().trim();
+            if (yRaw === '') {
+                throw new Error('Введите значение Y');
+            }
+            const y = parseFloat(yRaw);
             if (isNaN(y)) {
-                throw new Error('Введите корректное значение Y');
+                throw new Error('Y должно быть числом');
             }
             if (y < config.minY || y > config.maxY) {
                 throw new Error(`Y должен быть в диапазоне [${config.minY}, ${config.maxY}]`);
             }
 
-            // Проверка R
-            if (!rValue && rValue !== 0) {
-                throw new Error('Выберите значение R');
+            // --- R ---
+            const rRaw = $('#r').val()?.trim();
+            if (!rRaw) {
+                throw new Error('Введите значение R');
+            }
+            const r = parseFloat(rRaw);
+            if (isNaN(r)) {
+                throw new Error('R должно быть числом');
             }
 
-            return { x, y, r: rValue };
+            // Вот здесь вставляем нужную проверку:
+            if (window.currentR !== undefined && r !== window.currentR) {
+                throw new Error(`Значение R (${r}) не совпадает с активным диапазоном (${window.currentR}).`);
+            }
+
+            // Обновляем глобальное значение rValue
+            rValue = r;
+
+            return { x, y, r };
         } catch (error) {
             alert(error.message);
             return null;
         }
     }
+
+
 
     function loadFromHistory() {
         if (window.pointsHistoryAPI) {

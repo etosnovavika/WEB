@@ -237,111 +237,86 @@ import java.nio.ByteBuffer;
  * Утилиты: чтение параметров запроса, экранирование, форматирование чисел и JSON-помощники.
  */
 public class Util {
-    // возвращает properties только с нужными параметрами
-    //    public static Properties readRequestParams() {
-    //        try {
-    //            if (com.fastcgi.FCGIInterface.request == null || com.fastcgi.FCGIInterface.request.params == null) {
-    //                return new Properties();
-    //            }
-    //            String method = FCGIInterface.request.params.getProperty("REQUEST_METHOD", "GET");
-    //            String contentType = FCGIInterface.request.params.getProperty("CONTENT_TYPE", "");
-    //
-    //            String requestUri = com.fastcgi.FCGIInterface.request.params.getProperty("REQUEST_URI", "");
-    //            int q = requestUri.indexOf('?');
-    //            if (q < 0) return new Properties();
-    //            String query = requestUri.substring(q + 1);
-    //
-    //            Properties props = new Properties();
-    //            for (String pair : query.split("&")) {
-    //                if (pair.isEmpty()) continue;
-    //                String[] kv = pair.split("=", 2);
-    //                String key = URLDecoder.decode(kv[0], StandardCharsets.UTF_8.name());
-    //                String val = kv.length > 1 ? URLDecoder.decode(kv[1], StandardCharsets.UTF_8.name()) : "";
-    //                // ограничиваем длину
-    //                if (key.length() > 64 || val.length() > 512) continue;
-    //                // нет \r \n \0
-    //                if (val.contains("\r") || val.contains("\n") || val.indexOf('\0') >= 0) continue;
-    //                props.setProperty(key, val);
-    //            }
-    //            return props;
-    //        } catch (Exception e) {
-    //            System.err.println("Util.readRequestParams error: " + e.getMessage());
-    //            return new Properties();
-    //        }
-    //    }
+     //возвращает properties только с нужными параметрами
+        public static Properties readRequestParams() {
 
-    public static Properties readRequestParams(FCGIRequest request) {
-        Properties props = new Properties();
+            System.err.println(">>> CONTENT_LENGTH=" + FCGIInterface.request.params.getProperty("CONTENT_LENGTH"));
+            System.err.println(">>> CONTENT_TYPE=" + FCGIInterface.request.params.getProperty("CONTENT_TYPE"));
 
-        try {
+            try {
+                if (com.fastcgi.FCGIInterface.request == null || com.fastcgi.FCGIInterface.request.params == null) {
+                    return new Properties();
+                }
+                String method = FCGIInterface.request.params.getProperty("REQUEST_METHOD", "GET");
+                String contentType = FCGIInterface.request.params.getProperty("CONTENT_TYPE", "");
 
-            if (request == null || request.params == null) {
-                System.err.println("No FCGI request");
-                return props;
-            }
-
-            String method = request.params.getProperty("REQUEST_METHOD", "GET");
-            String contentType = request.params.getProperty("CONTENT_TYPE", "");
-            String requestUri = request.params.getProperty("REQUEST_URI", "");
-
-            // --- GET параметры ---
-            int q = requestUri.indexOf('?');
-            if ("GET".equalsIgnoreCase(method) && q >= 0) {
+                String requestUri = com.fastcgi.FCGIInterface.request.params.getProperty("REQUEST_URI", "");
+                int q = requestUri.indexOf('?');
+                if (q < 0) return new Properties();
                 String query = requestUri.substring(q + 1);
-                parseUrlEncoded(query, props);
+
+                Properties props = new Properties();
+                for (String pair : query.split("&")) {
+                    if (pair.isEmpty()) continue;
+                    String[] kv = pair.split("=", 2);
+                    String key = URLDecoder.decode(kv[0], StandardCharsets.UTF_8.name());
+                    String val = kv.length > 1 ? URLDecoder.decode(kv[1], StandardCharsets.UTF_8.name()) : "";
+                    // ограничиваем длину
+                    if (key.length() > 64 || val.length() > 512) continue;
+                    // нет \r \n \0
+                    if (val.contains("\r") || val.contains("\n") || val.indexOf('\0') >= 0) continue;
+                    props.setProperty(key, val);
+                }
+                return props;
+            } catch (Exception e) {
+                System.err.println("Util.readRequestParams error: " + e.getMessage());
+                return new Properties();
+            }
+        }
+    public static Properties readPostJsonParams() {
+        Properties props = new Properties();
+        try {
+            if (FCGIInterface.request == null) return props;
+
+            String method = FCGIInterface.request.params.getProperty("REQUEST_METHOD", "");
+            if (!"POST".equalsIgnoreCase(method)) {
                 return props;
             }
 
-            // --- POST параметры ---
-            if ("POST".equalsIgnoreCase(method)) {
-                String lenStr = request.params.getProperty("CONTENT_LENGTH", "0");
-                int contentLength = 0;
-                try {
-                    contentLength = Integer.parseInt(lenStr.trim());
-                } catch (NumberFormatException e) {
-                    System.err.println("⚠️ Invalid CONTENT_LENGTH: " + lenStr);
-                }
+            int contentLength = Integer.parseInt(
+                    FCGIInterface.request.params.getProperty("CONTENT_LENGTH", "0")
+            );
+            if (contentLength <= 0) return props;
 
-                if (contentLength > 0) {
-                    byte[] buf = new byte[contentLength];
-                    int bytesRead = 0;
-                    while (bytesRead < contentLength) {
-                        int r = request.inStream.read(buf, bytesRead, contentLength - bytesRead);
-                        if (r == -1) break;
-                        bytesRead += r;
-                    }
+            byte[] bodyBytes = new byte[contentLength];
+            int read = 0;
+            while (read < contentLength) {
+                int r = FCGIInterface.request.inStream.read(bodyBytes, read, contentLength - read);
+                if (r < 0) break;
+                read += r;
+            }
+            String body = new String(bodyBytes, 0, read, StandardCharsets.UTF_8).trim();
 
-                    String body = new String(buf, 0, bytesRead, StandardCharsets.UTF_8);
-                    System.err.println("POST body = " + body);
-                    System.err.println("Content-Type = " + contentType);
-
-                    // JSON-тело
-                    if (contentType.contains("application/json")) {
-                        try {
-                            org.json.JSONObject json = new org.json.JSONObject(body);
-                            for (String key : json.keySet()) {
-                                props.setProperty(key, String.valueOf(json.get(key)));
-                            }
-                        } catch (Exception e) {
-                            System.err.println("JSON parse error: " + e.getMessage());
-                        }
-                    }
-                    // URL-encoded форма
-                    else if (contentType.contains("application/x-www-form-urlencoded")) {
-                        parseUrlEncoded(body, props);
-                    }
-                } else {
-                    System.err.println("POST without body (CONTENT_LENGTH=0)");
+            // простой разбор JSON — добавим поддержку xMin, xMax, r
+            body = body.replaceAll("[{}\"\\s]", "");
+            for (String pair : body.split(",")) {
+                String[] kv = pair.split(":", 2);
+                if (kv.length != 2) continue;
+                String key = kv[0];
+                String val = kv[1];
+                // поддержка как координат, так и диапазонов
+                if (key.equals("x") || key.equals("y") || key.equals("r")
+                        || key.equals("xMin") || key.equals("xMax")) {
+                    props.setProperty(key, val);
                 }
             }
-
+            System.err.println(">>> raw body: " + body);
+            System.err.println(">>> parsed props: " + props);
         } catch (Exception e) {
-            System.err.println("Util.readRequestParams error:");
-            e.printStackTrace(System.err);
+            System.err.println("Util.readPostJsonParams error: " + e.getMessage());
         }
-
-        System.err.println("Parsed props: " + props);
         return props;
+
     }
 
 

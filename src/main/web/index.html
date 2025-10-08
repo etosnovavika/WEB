@@ -34,7 +34,7 @@
         </div>
         <div class="inputPlaceholder">
 
-            <form id="rangeForm" autocomplete="off">
+            <form id="rangeForm" method="post" autocomplete="off">
                 <div>
 
                     <label for="xMin" class="fieldName">X min:</label>
@@ -49,10 +49,14 @@
                     <input type="number" id="rRange" name="rRange" required step="0.5" min="1" max="5">
                 </div>
                 <button type="submit"><strong>Проверить диапазон</strong></button>
-                <div class="inputPlaceholder">
-                    <label for="x" class="fieldName">X</label>
-                    <input type="text" id="x" name="x" value="0" min="-100" max="100"
-                           placeholder="&#8722;3 &le; y &le; 3"
+            </form>
+
+                <div >
+                    <form id="form" method="get" autocomplete="off">
+                        <div class="inputPlaceholder">
+                            <label for="x" class="fieldName">X</label>
+                            <input type="text" id="x" name="x" value="0" min="-100" max="100"
+                                   placeholder="Введите X"
                            step="0.5" required>
                 </div>
                 <div class="inputPlaceholder">
@@ -64,21 +68,9 @@
                 <div class="inputPlaceholder">
                     <label for="r" class="fieldName">R</label>
                     <input type="text" id="r" name="r" value="0"
-                           placeholder="&#8722;3 &le; y &le; 3"
+                           placeholder="Введите R"
                            step="1" required>
-
                 </div>
-
-<!--                <div class="inputPlaceholder">-->
-<!--                    <label for="r" class="fieldName" >R:</label>-->
-<!--                    <div id="r" class="button-group controlPlaceholder">-->
-<!--                        <button type="button" class="r-button" value="1">1</button>-->
-<!--                        <button type="button" class="r-button" value="1.5">1.5</button>-->
-<!--                        <button type="button" class="r-button" value="2">2</button>-->
-<!--                        <button type="button" class="r-button" value="2.5">2.5</button>-->
-<!--                        <button type="button" class="r-button" value="3">3</button>-->
-<!--                    </div>-->
-<!--                </div>-->
                 <button id="submit" type="submit" class="btn-submit"><strong>Отправить</strong></button>
             </form>
         </div>
@@ -129,6 +121,9 @@
 <!--                <button id="submit" type="submit" class="btn-submit"><strong>Отправить</strong></button>-->
 <!--            </form>-->
 <!--        </div>-->
+            <div>
+                <button id="clearHistoryBtn" class="clear-btn">Очистить историю</button>
+            </div>
     </main>
     <div id="results">
         <h2>Результаты</h2>
