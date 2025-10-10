@@ -84,31 +84,6 @@ function drawCenterPoint() {
 }
 
 
-// function drawBoundaryByScan(R) {
-//     ctx.save();
-//     ctx.fillStyle = config.fillStyle;
-//     ctx.strokeStyle = config.fillStyle;
-//
-//
-//     const logicalStep = R / config.radius; // примерно соответствует 1 px
-//     const pixelSize = Math.max(1, Math.floor((config.radius * logicalStep) / R)); // ~1
-//
-//
-//     for (let lx = -R; lx <= R; lx += logicalStep) {
-//         for (let ly = R; ly >= -R; ly -= logicalStep) {
-//             if (isInside(lx, ly, R)) {
-//
-//                 const xpix = px(lx, R);
-//                 const ypix = py(ly, R);
-//
-//                 ctx.fillRect(xpix - pixelSize / 2, ypix - pixelSize / 2, pixelSize, pixelSize);
-//             }
-//         }
-//     }
-//
-//     ctx.restore();
-// }
-
 function drawBoundaryByScan(R) {
     ctx.save();
     ctx.fillStyle = config.fillStyle;
@@ -179,7 +154,7 @@ function drawLabels(R) {
 }
 
 
-const points = []; // { realX, realY, x, y }
+const points = [];
 
 function drawPoints() {
     points.forEach(p => drawPoint(p));
@@ -207,7 +182,7 @@ function insertPoint(x, y, r) {
     drawPoint(point);
 }
 
-// пересчитать пиксельные координаты точек при смене R
+// пересчитать координаты точек при смене R
 function refreshPoints(newR) {
     points.forEach(point => {
         point.x = px(point.realX, newR);
@@ -232,17 +207,16 @@ function drawPlot(currentR = 2) {
     drawPoints();
 }
 
-// ========== вспомогательная функция для обновления (интеграция с остальным кодом) ==========
+//  функция для обновления
 function refresh(R) {
     // обновляем точки по новому R и перерисовываем
     refreshPoints(R);
     drawPlot(R);
 }
 
-// инициируем первоначальную отрисовку (например, R=2)
+// первоначальную отрисовку
 drawPlot(2);
 
-// экспортируем функции в глобальную область (если нужно из другого скрипта)
 window.plot = {
     drawPlot,
     drawBoundaryByScan,

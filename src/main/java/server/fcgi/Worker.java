@@ -40,15 +40,6 @@ public abstract class Worker<RQ, RS> implements Runnable, FcgiConverter<RQ, RS> 
             sendError(400, "Invalid path");
             return;
         }
-//        System.out.println("REQUEST_METHOD=" + FCGIInterface.request.params.getProperty("REQUEST_METHOD"));
-//        System.out.println("CONTENT_TYPE=" + FCGIInterface.request.params.getProperty("CONTENT_TYPE"));
-//        System.out.println("CONTENT_LENGTH=" + FCGIInterface.request.params.getProperty("CONTENT_LENGTH"));
-
-
-//        if (FCGIInterface.request == null) {
-//            System.err.println("FCGI request is null — skipping iteration");
-//            return;
-//        }
 
         String method = FCGIInterface.request.params.getProperty("REQUEST_METHOD", "GET");
         String contentType = FCGIInterface.request.params.getProperty("CONTENT_TYPE", "");
@@ -78,23 +69,23 @@ public abstract class Worker<RQ, RS> implements Runnable, FcgiConverter<RQ, RS> 
         boolean wantJson = "json".equalsIgnoreCase(params.getProperty("format", ""));
 
         try {
-            // Шаг 1: конвертация параметров в объект запроса
+            // конвертация параметров в объект запроса
             final RQ request = encode(params);
 
-            // Шаг 2: валидация данных
+            // валидация данных
             validate(request);
 
-            // Шаг 3: обработка бизнес-логики
+            // обработка бизнес-логики
             final RS response = process(request);
 
 
-            // Шаг 4: сериализация результата
+            // сериализация результата
             String json = toJson(response);
             if (json == null) {
                 json = decode(response);
             }
 
-            // Шаг 5: отправка ответа
+            // отправка ответа
             if (json == null || json.isBlank()) {
                 String body = "{\"error\":\"server cannot produce json for this response\"}";
                 writeCgiResponse(500, "Internal Server Error", "application/json; charset=UTF-8", body);

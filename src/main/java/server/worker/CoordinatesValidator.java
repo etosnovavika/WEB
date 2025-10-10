@@ -27,7 +27,7 @@ public final class CoordinatesValidator extends Worker<ValidateCoordinatesReques
 
     @Override
     public ValidateCoordinatesRequest encode(Properties params) throws ValidationException {
-        // Берём настоящий метод из FCGI-заголовков
+        // метод из фсги заголовка
         String method = com.fastcgi.FCGIInterface.request.params
                 .getProperty("REQUEST_METHOD", "GET")
                 .toUpperCase();
@@ -39,7 +39,7 @@ public final class CoordinatesValidator extends Worker<ValidateCoordinatesReques
             throw new ValidationException("Unsupported HTTP method: " + method);
         }
 
-        // --- обычная точка ---
+        // обычная точка
         String sx = params.getProperty("x", "").trim();
         String syRaw = params.getProperty("y", "").trim();
         String sr = params.getProperty("r", "").trim();
@@ -147,6 +147,7 @@ private ValidateCoordinatesRequest handleRangeUpdate(Properties params) throws V
 
     private void validateX(Double x) throws ValidationException {
         if (x < RANGE_X_MIN || x > RANGE_X_MAX) {
+            sendError(400, "X must be between " + RANGE_X_MIN + " and " + RANGE_X_MAX);
             throw new ValidationException("X must be in range [" + RANGE_X_MIN + ", " + RANGE_X_MAX + "]");
         }
     }
@@ -161,5 +162,11 @@ private ValidateCoordinatesRequest handleRangeUpdate(Properties params) throws V
         if (r != RANGE_R) {
             throw new ValidationException("R must equal " + RANGE_R);
         }
+    }
+    private static void sendError(int code, String message) {
+        System.out.println("Status: " + code + " Bad Request");
+        System.out.println("Content-Type: application/json; charset=UTF-8");
+        System.out.println();
+        System.out.println("{\"error\":\"" + message + "\"}");
     }
 }

@@ -43,7 +43,6 @@ $(document).ready(function() {
                     rHint.style.display = 'inline';
                 }
 
-                // Если хочешь, можно сразу обновить график:
                 if (typeof refresh === 'function') refresh(r);
             } catch (e) {
                 console.error('Ошибка восстановления диапазона из localStorage:', e);
@@ -66,7 +65,7 @@ $(document).ready(function() {
             refresh(rValue);
         }
 
-        // Обновляем UI
+        // Обновляем таблицу
         rButton.removeClass("selected");
         $(`.r-button[value="${rValue}"]`).addClass("selected");
 
@@ -88,7 +87,7 @@ $(document).ready(function() {
             value = '-' + value.replace(/-/g, '');
         }
 
-        // Валидация числа
+        // Валидация числа для y
         const numValue = parseFloat(value);
         if (!isNaN(numValue)) {
             // Проверка диапазона
@@ -143,12 +142,11 @@ $(document).ready(function() {
                 throw new Error('R должно быть числом');
             }
 
-            // Вот здесь вставляем нужную проверку:
             if (window.currentR !== undefined && r !== window.currentR) {
                 throw new Error(`Значение R (${r}) не совпадает с активным диапазоном (${window.currentR}).`);
             }
 
-            // Обновляем глобальное значение rValue
+
             rValue = r;
 
             return { x, y, r };
@@ -178,26 +176,26 @@ $(document).ready(function() {
     }
 
     function setupEventListeners() {
-        // Кнопки R
+
         rButton.on("click", function() {
             setR($(this).val());
         });
 
-        // Ввод Y
+
         yInput.on('input', validateYInput);
 
-        // Валидация при потере фокуса
+
         yInput.on('blur', function() {
             if (yInput.val() && !isNaN(parseFloat(yInput.val()))) {
                 validateYInput();
             }
         });
 
-        // Глобальная функция для получения данных формы
+
         window.getFormData = getFormData;
     }
 
-    // Экспорт функций для использования в других скриптах
+
     window.formManager = {
         setR,
         getFormData,

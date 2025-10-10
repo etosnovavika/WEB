@@ -33,7 +33,6 @@ $(function() {
         }
     }
 
-    // Вспомогательные функции для работы с cookies
     function setCookie(name, value, days) {
         const date = new Date();
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -111,7 +110,7 @@ $(function() {
         console.log('Таблица восстановлена из cookies:', pointsHistory.length, 'строк');
     }
 
-    // Восстановление карточек результатов
+    // Восстановление результатов
     function restoreCardsFromHistory() {
         if (!resultContainer || resultContainer.length === 0) return;
 
@@ -148,38 +147,6 @@ $(function() {
         return pointsHistory.slice();
     }
 
-    // Функция для очистки истории
-    // function clearHistory() {
-    //     pointsHistory.length = 0;
-    //     saveHistoryToCookies(); // Обновляем cookies
-    //     localStorage.removeItem('lastRange')
-    //
-    //     // Очищаем UI
-    //     if (tableBody && tableBody.length) {
-    //         tableBody.empty();
-    //     }
-    //     if (resultContainer && resultContainer.length) {
-    //         resultContainer.empty();
-    //     }
-    //
-    //     // Очищаем точки на графике
-    //     if (typeof window.plot?.clearPoints === 'function') {
-    //         window.plot.clearPoints();
-    //     } else if (window.points && Array.isArray(window.points)) {
-    //         window.points.length = 0;
-    //         if (typeof refresh === 'function') refresh(2);
-    //     }
-    //
-    //     if (typeof window.refresh === 'function') {
-    //         const lastR = localStorage.getItem('lastRange')
-    //             ? JSON.parse(localStorage.getItem('lastRange')).r
-    //             : 1;
-    //         refresh(lastR);
-    //     }
-    //
-    //
-    //     console.log('История точек очищена');
-    // }
     function clearHistory() {
         console.group('Очистка истории');
 
@@ -191,7 +158,7 @@ $(function() {
         localStorage.removeItem('lastRange');
         console.log('lastRange удалён из localStorage');
 
-        // Очищаем визуальную часть (таблицу и карточки)
+        // Очищаем таблицу и карточки
         if (tableBody && tableBody.length) {
             tableBody.empty();
             console.log('Таблица результатов очищена');
@@ -210,7 +177,7 @@ $(function() {
             console.log('Точки удалены из window.points');
         }
 
-        //Перерисовываем график (чтобы он очистился сразу)
+        //перерисовываем график
         const lastR = (() => {
             try {
                 const stored = localStorage.getItem('lastRange');
@@ -225,18 +192,18 @@ $(function() {
             console.log('График перерисован после очистки');
         }
 
-        // 6️⃣ Сообщаем в консоль
+
         console.log('История точек полностью очищена');
         console.groupEnd();
     }
 
 
-    // Функция для получения последней точки
+    // получаем последнюю точку
     function getLastPoint() {
         return pointsHistory.length > 0 ? pointsHistory[pointsHistory.length - 1] : null;
     }
 
-    // Функция для получения точек по определенному R
+    //расставляем для r
     function getPointsByR(rValue) {
         return pointsHistory.filter(point => point.r === rValue);
     }
@@ -257,7 +224,7 @@ $(function() {
         console.log('Точки восстановлены на графике из cookies:', pointsHistory.length, 'точек');
     }
 
-    // Отправка запроса через fetch
+   // отправка запроса для пост
     async function sendRequest(xValue, yValue, selectedR) {
         const url = `/fcgi-bin/WEB1_2_2.jar?x=${encodeURIComponent(xValue)}&y=${encodeURIComponent(yValue)}&r=${encodeURIComponent(selectedR)}`;
         console.log('Sending request:', url);
@@ -283,7 +250,7 @@ $(function() {
             const data = await resp.json();
             console.log('Parsed JSON:', data);
 
-            // Добавляем точку в историю (автоматически сохраняется в cookies)
+            // Добавляем точку в историю
             addToHistory(data);
 
             // рисуем точку
@@ -295,7 +262,7 @@ $(function() {
                 }
             }
 
-            // добавляем карточку/строку
+            // добавляем контейнер
             if (resultContainer && resultContainer.length) {
                 const cardHtml = renderResultCard(data);
                 resultContainer.prepend(cardHtml);
@@ -343,9 +310,9 @@ $(function() {
             });
     });
 
-    // Инициализация при загрузке
+
     function initialize() {
-        // Восстанавливаем UI из cookies
+        // Восстанавливаем таблицу из cookies
         restoreTableFromHistory();
         restoreCardsFromHistory();
         restorePointsOnGraph();
@@ -363,7 +330,7 @@ $(function() {
         saveHistoryToCookies
     };
 
-    // Добавляем функцию для ручного управления cookies
+    // для ручного управления cookies
     window.cookiesManager = {
         setCookie,
         getCookie,
@@ -374,7 +341,7 @@ $(function() {
         }
     };
 
-    // Инициализируем при загрузке
+
     initialize();
 
     async function sendRange(xMin, xMax, r) {
@@ -394,14 +361,14 @@ $(function() {
             window.currentR = r;
             localStorage.setItem('lastRange', JSON.stringify(rangeData));
 
-            // Обновляем поля формы координат
+
             const rInput = document.getElementById('r');
             if (rInput) {
                 rInput.value = r;
                 rInput.readOnly = true;
             }
 
-            // Обновляем подсказку
+
             const rHint = document.getElementById('rHint');
             if (rHint) {
                 rHint.textContent = `Диапазон: X=[${xMin}, ${xMax}], R=${r}`;
@@ -429,7 +396,6 @@ $(function() {
 
         try {
             const {xMin, xMax, r} = JSON.parse(savedRange);
-            // console.log('Восстановлен диапазон:', xMin, xMax, r);
 
             // Обновляем форму диапазона
             updateRangeFormFields(xMin, xMax, r);
@@ -441,14 +407,13 @@ $(function() {
                 rInput.readOnly = true;
             }
 
-            // Подсказка под R
             const rHint = document.getElementById('rHint');
             if (rHint) {
                 rHint.textContent = `Восстановлен диапазон: X=[${xMin}, ${xMax}], R=${r}`;
                 rHint.style.display = 'inline';
             }
 
-            // Можно обновить график
+
             if (typeof refresh === 'function') refresh(r);
 
             window.currentR = r;
@@ -471,6 +436,7 @@ $(function() {
 
         sendRange(xMin, xMax, r);
     });
+
     $(document).ready(function () {
         restoreRangeFromStorage();
     });
